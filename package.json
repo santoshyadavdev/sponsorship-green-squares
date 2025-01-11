@@ -37,7 +37,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.11.1"
+    "@actions/core": "^1.11.1",
+    "@octokit/rest": "^21.1.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.3",
