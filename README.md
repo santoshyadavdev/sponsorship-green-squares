@@ -72,17 +72,12 @@ need to perform some initial setup steps before you can develop your action.
 
    ```bash
    npm run bundle
-   ```
+````
 
 1. :white_check_mark: Run the tests
 
    ```bash
    $ npm test
-
-   PASS  ./index.test.js
-     ✓ throws invalid number (3ms)
-     ✓ wait 500 ms (504ms)
-     ✓ test runs (95ms)
 
    ...
    ```
@@ -95,4 +90,7 @@ input(s) and output(s). For details about this file, see
 
 When you copy this repository, update `action.yml` with the name, description,
 inputs, and outputs for your action.
-````
+
+```
+
+```
