@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as core from '@actions/core'
 import fs from 'fs'
 import { graphql } from '@octokit/graphql'
@@ -39,7 +40,7 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
   `
 
   try {
-    const response = await graphql({
+    const response = await graphql<any>({
       query,
       headers: {
         authorization: `token ${token}`
