@@ -16,7 +16,7 @@ To use this action, create a workflow file (e.g.,
 `.github/workflows/sponsorship.yml`) in your repository with the following
 content:
 
-````yaml
+```yaml
 name: Fetch Sponsorships and Commit
 
 on:
