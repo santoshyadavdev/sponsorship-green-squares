@@ -1,8 +1,7 @@
 name: Fetch Sponsorships and commit
 description:
-  Sponsorship is a way to support the people who build and maintain the open
-  source projects you depend on. This action fetches the sponsorships of a user
-  or organization and commits the data to the repository.
+  This action fetches the sponsorships of a user or organization and commits the
+  data to the repository.
 author: Santosh Yadav
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
