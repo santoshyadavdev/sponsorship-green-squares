@@ -30772,6 +30772,7 @@ const Octokit = Octokit$1.plugin(requestLog, legacyRestEndpointMethods, paginate
   }
 );
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const token = process.env.GITHUB_TOKEN;
 const octokit = new Octokit({ auth: token });
 async function fetchSponsoredProfiles() {
