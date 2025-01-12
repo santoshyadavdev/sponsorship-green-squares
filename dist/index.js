@@ -30778,6 +30778,11 @@ const GH_USERNAME = coreExports.getInput('GH_USERNAME');
 const COMMIT_NAME = coreExports.getInput('COMMIT_NAME');
 const COMMIT_EMAIL = coreExports.getInput('COMMIT_EMAIL');
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+/**
+ * Fetches sponsored profiles from the GitHub API.
+ *
+ * @returns A list of sponsored profiles.
+ */
 async function fetchSponsoredProfiles() {
     const query = `
       query {
@@ -30822,6 +30827,11 @@ async function fetchSponsoredProfiles() {
         return [];
     }
 }
+/**
+ * Commits the changes if the commit message is not a duplicate.
+ *
+ * @param commitMessage The commit message.
+ */
 async function commitIfNotDuplicate(commitMessage) {
     const { data: commits } = await octokit.repos.listCommits({
         owner: GH_USERNAME,

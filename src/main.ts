@@ -10,6 +10,9 @@ const COMMIT_NAME = core.getInput('COMMIT_NAME')
 const COMMIT_EMAIL = core.getInput('COMMIT_EMAIL')
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 
+/**
+ * A sponsored profile.
+ */
 interface SponsoredProfile {
   sponsorLogin: string
   sponsorshipAmount: number
@@ -17,6 +20,11 @@ interface SponsoredProfile {
   createdAt: string
 }
 
+/**
+ * Fetches sponsored profiles from the GitHub API.
+ *
+ * @returns A list of sponsored profiles.
+ */
 async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
   const query = `
       query {
@@ -66,6 +74,11 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
   }
 }
 
+/**
+ * Commits the changes if the commit message is not a duplicate.
+ *
+ * @param commitMessage The commit message.
+ */
 async function commitIfNotDuplicate(commitMessage: string) {
   const { data: commits } = await octokit.repos.listCommits({
     owner: GH_USERNAME,
