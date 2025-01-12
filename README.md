@@ -39,10 +39,10 @@ jobs:
 ```
 
 ### Inputs
-GH_USERNAME: Your GitHub username (default: ${{ github.repository_owner }})
-COMMIT_NAME: Name of the committer (default: github-actions[bot])
-COMMIT_EMAIL: Email of the committer (default: github-actions[bot]@users.noreply.github.com)
 
+GH_USERNAME: Your GitHub username (default: ${{ github.repository_owner }})
+COMMIT_NAME: Name of the committer (default: github-actions[bot]) COMMIT_EMAIL:
+Email of the committer (default: github-actions[bot]@users.noreply.github.com)
 
 ## Initial Setup
 
@@ -64,6 +64,8 @@ need to perform some initial setup steps before you can develop your action.
 
    ```bash
    npm install
+   ```
+
 ````
 
 1. :building_construction: Package the TypeScript for distribution
@@ -93,3 +95,4 @@ input(s) and output(s). For details about this file, see
 
 When you copy this repository, update `action.yml` with the name, description,
 inputs, and outputs for your action.
+````
