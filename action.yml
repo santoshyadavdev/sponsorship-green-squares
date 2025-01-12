@@ -1,23 +1,29 @@
 name: Fetch Sponsorships and commit
-description: Sponsorship is a way to support the people who build and maintain the open source projects you depend on. This action fetches the sponsorships of a user or organization and commits the data to the repository.
+description:
+  Sponsorship is a way to support the people who build and maintain the open
+  source projects you depend on. This action fetches the sponsorships of a user
+  or organization and commits the data to the repository.
 author: Santosh Yadav
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
   icon: heart
-  color: red
+  color: blue
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
-    required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: Your output description here
+  GH_USERNAME:
+    description: 'Your GitHub username'
+    default: ${{ github.repository_owner }}
+    required: false
+  COMMIT_NAME:
+    description: 'Name of the committer'
+    default: 'github-actions[bot]'
+    required: false
+  COMMIT_EMAIL:
+    description: 'Email of the committer'
+    default: 'github-actions[bot]@users.noreply.github.com'
+    required: false
 
 runs:
   using: node20
