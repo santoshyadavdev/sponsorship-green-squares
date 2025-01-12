@@ -106,11 +106,13 @@ export async function run(): Promise<void> {
 
     // Log the current timestamp, wait, then log the new timestamp
     fetchSponsoredProfiles().then((data) => {
+      core.debug(`number of profiles fetched: ${data.length}`)
       const currentDate = new Date()
       const month = currentDate.toLocaleString('default', { month: 'long' })
       const year = currentDate.getFullYear()
 
       data.forEach(async (profile) => {
+        core.debug(`Sponsor: ${profile.sponsorLogin}`)
         const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`
 
         await commitIfNotDuplicate(commitMessage)

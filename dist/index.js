@@ -30856,10 +30856,12 @@ async function run() {
         coreExports.debug(`Waiting ${ms} milliseconds ...`);
         // Log the current timestamp, wait, then log the new timestamp
         fetchSponsoredProfiles().then((data) => {
+            coreExports.debug(`number of profiles fetched: ${data.length}`);
             const currentDate = new Date();
             const month = currentDate.toLocaleString('default', { month: 'long' });
             const year = currentDate.getFullYear();
             data.forEach(async (profile) => {
+                coreExports.debug(`Sponsor: ${profile.sponsorLogin}`);
                 const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`;
                 await commitIfNotDuplicate(commitMessage);
             });
