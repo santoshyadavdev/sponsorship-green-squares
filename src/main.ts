@@ -49,6 +49,8 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
       }
     })
 
+    core.debug(`Response: ${JSON.stringify(response)}`)
+
     const sponsoredProfiles: SponsoredProfile[] =
       response.viewer.sponsorshipsAsSponsor.nodes.map((sponsorship: any) => ({
         sponsorLogin: sponsorship.sponsorable.login,
@@ -65,14 +67,9 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
 }
 
 async function commitIfNotDuplicate(commitMessage: string) {
-  const repo = process.env.GITHUB_REPOSITORY
-  if (!repo) {
-    throw new Error('GITHUB_REPOSITORY is not defined')
-  }
-
   const { data: commits } = await octokit.repos.listCommits({
     owner: GH_USERNAME,
-    repo,
+    repo: GH_USERNAME,
     per_page: 100
   })
 
