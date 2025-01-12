@@ -36,6 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+```
 
 ### Inputs
 GH_USERNAME: Your GitHub username (default: ${{ github.repository_owner }})

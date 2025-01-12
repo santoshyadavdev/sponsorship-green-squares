@@ -111,7 +111,7 @@ export async function run(): Promise<void> {
       const month = currentDate.toLocaleString('default', { month: 'long' })
       const year = currentDate.getFullYear()
 
-      data.forEach(async (profile, index) => {
+      data.forEach(async (profile) => {
         const filePath = `${year}/${month}/sponsoredProfile_${profile.sponsorLogin}.json`
         fs.writeFileSync(filePath, JSON.stringify(profile, null, 2))
 

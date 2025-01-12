@@ -30857,7 +30857,7 @@ async function run() {
             const currentDate = new Date();
             const month = currentDate.toLocaleString('default', { month: 'long' });
             const year = currentDate.getFullYear();
-            data.forEach(async (profile, index) => {
+            data.forEach(async (profile) => {
                 const filePath = `${year}/${month}/sponsoredProfile_${profile.sponsorLogin}.json`;
                 require$$1.writeFileSync(filePath, JSON.stringify(profile, null, 2));
                 const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} sponsorship paid to @${profile.sponsorLogin} for ${month} ${year}`;
