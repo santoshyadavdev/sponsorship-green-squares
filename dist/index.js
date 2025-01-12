@@ -30808,6 +30808,7 @@ async function fetchSponsoredProfiles() {
                 authorization: `token ${process.env.GITHUB_TOKEN}`
             }
         });
+        coreExports.debug(`Response: ${JSON.stringify(response)}`);
         const sponsoredProfiles = response.viewer.sponsorshipsAsSponsor.nodes.map((sponsorship) => ({
             sponsorLogin: sponsorship.sponsorable.login,
             sponsorshipAmount: sponsorship.tier.monthlyPriceInDollars,
@@ -30822,13 +30823,9 @@ async function fetchSponsoredProfiles() {
     }
 }
 async function commitIfNotDuplicate(commitMessage) {
-    const repo = process.env.GITHUB_REPOSITORY;
-    if (!repo) {
-        throw new Error('GITHUB_REPOSITORY is not defined');
-    }
     const { data: commits } = await octokit.repos.listCommits({
         owner: GH_USERNAME,
-        repo,
+        repo: GH_USERNAME,
         per_page: 100
     });
     const duplicateCommit = commits.find((commit) => commit.commit.message === commitMessage);
