@@ -34,7 +34,7 @@ jobs:
       - name: Fetch Sponsorships and Commit
         uses: @santoshyadavdev/sponsoship-green-squares@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 ### Inputs
