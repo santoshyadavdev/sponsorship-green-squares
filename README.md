@@ -75,7 +75,7 @@ need to perform some initial setup steps before you can develop your action.
 1. :white_check_mark: Run the tests
 
 ```bash
-$ npm test
+ npm test
 ```
 
 ## Update the Action Metadata
