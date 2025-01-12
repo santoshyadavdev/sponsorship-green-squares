@@ -8,8 +8,7 @@ import { Octokit } from '@octokit/rest'
 const GH_USERNAME = core.getInput('GH_USERNAME')
 const COMMIT_NAME = core.getInput('COMMIT_NAME')
 const COMMIT_EMAIL = core.getInput('COMMIT_EMAIL')
-const token = process.env.GITHUB_TOKEN
-const octokit = new Octokit({ auth: token })
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 
 interface SponsoredProfile {
   sponsorLogin: string
@@ -46,7 +45,7 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
     const response = await graphql<any>({
       query,
       headers: {
-        authorization: `token ${token}`
+        authorization: `token ${process.env.GITHUB_TOKEN}`
       }
     })
 

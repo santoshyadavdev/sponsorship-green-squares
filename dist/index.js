@@ -30777,8 +30777,7 @@ const Octokit = Octokit$1.plugin(requestLog, legacyRestEndpointMethods, paginate
 const GH_USERNAME = coreExports.getInput('GH_USERNAME');
 const COMMIT_NAME = coreExports.getInput('COMMIT_NAME');
 const COMMIT_EMAIL = coreExports.getInput('COMMIT_EMAIL');
-const token = process.env.GITHUB_TOKEN;
-const octokit = new Octokit({ auth: token });
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 async function fetchSponsoredProfiles() {
     const query = `
       query {
@@ -30806,7 +30805,7 @@ async function fetchSponsoredProfiles() {
         const response = await graphql2({
             query,
             headers: {
-                authorization: `token ${token}`
+                authorization: `token ${process.env.GITHUB_TOKEN}`
             }
         });
         const sponsoredProfiles = response.viewer.sponsorshipsAsSponsor.nodes.map((sponsorship) => ({
