@@ -56,8 +56,8 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
-        with:
-          milliseconds: 2000
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print Output
         id: output
