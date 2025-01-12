@@ -8,8 +8,7 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
+permissions: read-all
 
 jobs:
   test-typescript:
@@ -61,4 +60,4 @@ jobs:
 
       - name: Print Output
         id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+        run: echo "success"
