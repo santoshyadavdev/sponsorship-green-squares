@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as core from '@actions/core'
-import fs from 'fs'
 import { graphql } from '@octokit/graphql'
 import { execSync } from 'child_process'
 import { Octokit } from '@octokit/rest'
@@ -66,7 +65,7 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
   }
 }
 
-async function commitIfNotDuplicate(commitMessage: string, filePath: string) {
+async function commitIfNotDuplicate(commitMessage: string) {
   const repo = process.env.GITHUB_REPOSITORY
   if (!repo) {
     throw new Error('GITHUB_REPOSITORY is not defined')
@@ -86,8 +85,7 @@ async function commitIfNotDuplicate(commitMessage: string, filePath: string) {
     // Commit the changes
     execSync(`git config --global user.name "${COMMIT_NAME}"`)
     execSync(`git config --global user.email "${COMMIT_EMAIL}"`)
-    execSync(`git add ${filePath}`)
-    execSync(`git commit -m "${commitMessage}"`)
+    execSync(`git commit --allow-empty -m "${commitMessage}"`)
     execSync('git push')
   } else {
     core.setFailed(`Duplicate commit found: ${commitMessage}`)
@@ -108,17 +106,16 @@ export async function run(): Promise<void> {
 
     // Log the current timestamp, wait, then log the new timestamp
     fetchSponsoredProfiles().then((data) => {
+      core.debug(`number of profiles fetched: ${data.length}`)
       const currentDate = new Date()
       const month = currentDate.toLocaleString('default', { month: 'long' })
       const year = currentDate.getFullYear()
 
       data.forEach(async (profile) => {
-        const filePath = `${year}/${month}/sponsoredProfile_${profile.sponsorLogin}.json`
-        fs.writeFileSync(filePath, JSON.stringify(profile, null, 2))
-
+        core.debug(`Sponsor: ${profile.sponsorLogin}`)
         const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`
 
-        await commitIfNotDuplicate(commitMessage, filePath)
+        await commitIfNotDuplicate(commitMessage)
       })
     })
   } catch (error) {
