@@ -5,6 +5,10 @@ import { graphql } from '@octokit/graphql'
 import { execSync } from 'child_process'
 import { Octokit } from '@octokit/rest'
 
+// Get config
+const GH_USERNAME = core.getInput('GH_USERNAME')
+const COMMIT_NAME = core.getInput('COMMIT_NAME')
+const COMMIT_EMAIL = core.getInput('COMMIT_EMAIL')
 const token = process.env.GITHUB_TOKEN
 const octokit = new Octokit({ auth: token })
 
@@ -57,7 +61,7 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
 
     return sponsoredProfiles
   } catch (error: any) {
-    core.setFailed('Error fetching sponsored profiles:', error.message)
+    core.setFailed(`Error fetching sponsored profiles: ${error.message}`)
     return []
   }
 }
@@ -67,10 +71,9 @@ async function commitIfNotDuplicate(commitMessage: string, filePath: string) {
   if (!repo) {
     throw new Error('GITHUB_REPOSITORY is not defined')
   }
-  const owner = repo.split('/')
 
   const { data: commits } = await octokit.repos.listCommits({
-    owner,
+    owner: GH_USERNAME,
     repo,
     per_page: 100
   })
@@ -81,10 +84,8 @@ async function commitIfNotDuplicate(commitMessage: string, filePath: string) {
 
   if (!duplicateCommit) {
     // Commit the changes
-    execSync('git config --global user.name "github-actions[bot]"')
-    execSync(
-      'git config --global user.email "github-actions[bot]@users.noreply.github.com"'
-    )
+    execSync(`git config --global user.name "${COMMIT_NAME}"`)
+    execSync(`git config --global user.email "${COMMIT_EMAIL}"`)
     execSync(`git add ${filePath}`)
     execSync(`git commit -m "${commitMessage}"`)
     execSync('git push')
@@ -115,7 +116,7 @@ export async function run(): Promise<void> {
         const filePath = `${year}/${month}/sponsoredProfile_${profile.sponsorLogin}.json`
         fs.writeFileSync(filePath, JSON.stringify(profile, null, 2))
 
-        const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} sponsorship paid to @${profile.sponsorLogin} for ${month} ${year}`
+        const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`
 
         await commitIfNotDuplicate(commitMessage, filePath)
       })
