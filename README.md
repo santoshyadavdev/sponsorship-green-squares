@@ -76,8 +76,6 @@ need to perform some initial setup steps before you can develop your action.
 
 ```bash
 $ npm test
-
-...
 ```
 
 ## Update the Action Metadata
@@ -88,7 +86,3 @@ input(s) and output(s). For details about this file, see
 
 When you copy this repository, update `action.yml` with the name, description,
 inputs, and outputs for your action.
-
-```
-
-```
