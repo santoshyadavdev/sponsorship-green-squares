@@ -3,6 +3,7 @@ import * as core from '@actions/core'
 import { graphql } from '@octokit/graphql'
 import { execSync } from 'child_process'
 import { Octokit } from '@octokit/rest'
+import * as fs from 'fs'
 
 // Get config
 const GH_USERNAME = core.getInput('GH_USERNAME')
@@ -66,7 +67,10 @@ async function fetchSponsoredProfiles(): Promise<SponsoredProfile[]> {
   }
 }
 
-async function commitIfNotDuplicate(commitMessage: string) {
+async function commitIfNotDuplicate(
+  commitMessage: string,
+  fileUpdate?: { path: string; content: string }
+): Promise<void> {
   const { data: commits } = await octokit.repos.listCommits({
     owner: GH_USERNAME,
     repo: GH_USERNAME,
@@ -78,14 +82,71 @@ async function commitIfNotDuplicate(commitMessage: string) {
   )
 
   if (!duplicateCommit) {
-    // Commit the changes
+    if (fileUpdate) {
+      fs.writeFileSync(fileUpdate.path, fileUpdate.content, 'utf8')
+      execSync(`git add ${fileUpdate.path}`)
+    }
     execSync(`git config --global user.name "${COMMIT_NAME}"`)
     execSync(`git config --global user.email "${COMMIT_EMAIL}"`)
     execSync(`git commit --allow-empty -m "${commitMessage}"`)
     execSync('git push')
   } else {
-    core.setFailed(`Duplicate commit found: ${commitMessage}`)
+    core.info(`Skipping duplicate commit: ${commitMessage}`)
   }
+}
+
+async function updateReadme(profiles: SponsoredProfile[]): Promise<void> {
+  const allowReadmeUpdate = core.getInput('allow-add-to-readme') === 'true'
+  if (!allowReadmeUpdate) return
+
+  if (!Array.isArray(profiles)) {
+    throw new Error('Invalid profiles data')
+  }
+
+  const readmePath = 'README.md'
+  const startMarker = '<!-- SPONSORSHIP-DATA:START -->'
+  const endMarker = '<!-- SPONSORSHIP-DATA:END -->'
+
+  let readmeContent = ''
+  try {
+    readmeContent = fs.readFileSync(readmePath, 'utf8')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      core.warning('README.md not found, creating new file')
+    } else {
+      throw new Error(`Failed to read README.md: ${error}`)
+    }
+  }
+
+  const sponsorshipData = profiles
+    .map((p) => `- @${p.sponsorLogin}: ${p.sponsorshipAmount} ${p.currency}`)
+    .join('\n')
+
+  const newContent = `${startMarker}\n${sponsorshipData}\n${endMarker}`
+
+  if (readmeContent) {
+    const startIndex = readmeContent.indexOf(startMarker)
+    const endIndex = readmeContent.indexOf(endMarker) + endMarker.length
+
+    if (startIndex === -1 || endIndex === -1) {
+      core.info('Markers not found, appending content to README')
+      readmeContent = `${readmeContent}\n\n${newContent}`
+    } else if (endIndex <= startIndex) {
+      throw new Error('Invalid marker positions in README.md')
+    } else {
+      readmeContent =
+        readmeContent.substring(0, startIndex) +
+        newContent +
+        readmeContent.substring(endIndex)
+    }
+  } else {
+    readmeContent = newContent
+  }
+
+  await commitIfNotDuplicate(`Update README with sponsorship data`, {
+    path: readmePath,
+    content: readmeContent
+  })
 }
 
 /**
@@ -93,27 +154,25 @@ async function commitIfNotDuplicate(commitMessage: string) {
  *
  * @returns Resolves when the action is complete.
  */
+
 export async function run(): Promise<void> {
   try {
     const ms: string = core.getInput('milliseconds')
+    const profiles = await fetchSponsoredProfiles()
+    await updateReadme(profiles)
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
     core.debug(`Waiting ${ms} milliseconds ...`)
+    core.debug(`number of profiles fetched: ${profiles.length}`)
 
-    // Log the current timestamp, wait, then log the new timestamp
-    fetchSponsoredProfiles().then((data) => {
-      core.debug(`number of profiles fetched: ${data.length}`)
-      const currentDate = new Date()
-      const month = currentDate.toLocaleString('default', { month: 'long' })
-      const year = currentDate.getFullYear()
+    const currentDate = new Date()
+    const month = currentDate.toLocaleString('default', { month: 'long' })
+    const year = currentDate.getFullYear()
 
-      data.forEach(async (profile) => {
-        core.debug(`Sponsor: ${profile.sponsorLogin}`)
-        const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`
-
-        await commitIfNotDuplicate(commitMessage)
-      })
-    })
+    for (const profile of profiles) {
+      core.debug(`Sponsor: ${profile.sponsorLogin}`)
+      const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`
+      await commitIfNotDuplicate(commitMessage)
+    }
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

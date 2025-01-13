@@ -23,6 +23,10 @@ inputs:
     description: 'Email of the committer'
     default: 'github-actions[bot]@users.noreply.github.com'
     required: false
+  allow-add-to-readme:
+    description: 'Add sponsorship data to README.md'
+    required: false
+    default: 'false'
 
 runs:
   using: node20

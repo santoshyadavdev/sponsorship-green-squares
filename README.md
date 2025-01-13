@@ -29,14 +29,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Fetch Sponsorships and Commit
-        uses: @santoshyadavdev/sponsoship-green-squares@master
+        uses: santoshyadavdev/sponsorship-green-squares@main
+        with:
+          allow-add-to-readme: 'false' # Default value, set to 'true' to enable README updates
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 ```
+
+### Readme Integration
+
+When `allow-add-to-readme` is set to 'true', the action will update your
+README.md with sponsorship data. Add these markers where you want the data to
+appear:
+
+```markdown
+<!-- SPONSORSHIP-DATA:START -->
+<!-- SPONSORSHIP-DATA:END -->
+```
+
+The action will automatically insert sponsorship data between these markers in
+the format:
+
+- @username: 5 USD
+- @sponsor2: 10 USD
 
 ### Inputs
 
