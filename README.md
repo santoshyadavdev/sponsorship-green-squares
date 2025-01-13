@@ -36,7 +36,7 @@ jobs:
         with:
           allow-add-to-readme: 'false' # Default value, set to 'true' to enable README updates
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # do not use GITHUB_TOKEN as it lacks the permission to call graphql APIs, create a new Personal Access TOKEN and provide read:org access to read to sponsorship data
 ```
 
 ### Readme Integration
@@ -53,14 +53,12 @@ appear:
 The action will automatically insert sponsorship data between these markers in
 the format:
 
-- @username: 5 USD
-- @sponsor2: 10 USD
+- @username-1: 5 USD
+- @username-2: 10 USD
 
 ### Inputs
 
-GH_USERNAME: Your GitHub username (default: ${{ github.repository_owner }})
-COMMIT_NAME: Name of the committer (default: github-actions[bot]) COMMIT_EMAIL:
-Email of the committer (default: github-actions[bot]@users.noreply.github.com)
+1. GH_USERNAME: Your GitHub username (default: ${{ github.repository_owner }})
 
 ## Initial Setup
 

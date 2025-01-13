@@ -15,14 +15,6 @@ inputs:
     description: 'Your GitHub username'
     default: ${{ github.repository_owner }}
     required: false
-  COMMIT_NAME:
-    description: 'Name of the committer'
-    default: 'github-actions[bot]'
-    required: false
-  COMMIT_EMAIL:
-    description: 'Email of the committer'
-    default: 'github-actions[bot]@users.noreply.github.com'
-    required: false
   allow-add-to-readme:
     description: 'Add sponsorship data to README.md'
     required: false

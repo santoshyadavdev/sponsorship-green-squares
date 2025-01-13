@@ -30776,8 +30776,6 @@ const Octokit = Octokit$1.plugin(requestLog, legacyRestEndpointMethods, paginate
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Get config
 const GH_USERNAME = coreExports.getInput('GH_USERNAME');
-const COMMIT_NAME = coreExports.getInput('COMMIT_NAME');
-const COMMIT_EMAIL = coreExports.getInput('COMMIT_EMAIL');
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 async function fetchSponsoredProfiles() {
     const query = `
@@ -30835,8 +30833,9 @@ async function commitIfNotDuplicate(commitMessage, fileUpdate) {
             require$$1.writeFileSync(fileUpdate.path, fileUpdate.content, 'utf8');
             execSync(`git add ${fileUpdate.path}`);
         }
-        execSync(`git config --global user.name "${COMMIT_NAME}"`);
-        execSync(`git config --global user.email "${COMMIT_EMAIL}"`);
+        const { data: user } = await octokit.request('GET /user');
+        execSync(`git config --global user.name "${user.name}"`);
+        execSync(`git config --global user.email "${user.email}"`);
         execSync(`git commit --allow-empty -m "${commitMessage}"`);
         execSync('git push');
     }

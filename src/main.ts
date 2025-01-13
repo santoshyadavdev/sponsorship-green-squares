@@ -7,8 +7,6 @@ import * as fs from 'fs'
 
 // Get config
 const GH_USERNAME = core.getInput('GH_USERNAME')
-const COMMIT_NAME = core.getInput('COMMIT_NAME')
-const COMMIT_EMAIL = core.getInput('COMMIT_EMAIL')
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 
 interface SponsoredProfile {
@@ -86,8 +84,10 @@ async function commitIfNotDuplicate(
       fs.writeFileSync(fileUpdate.path, fileUpdate.content, 'utf8')
       execSync(`git add ${fileUpdate.path}`)
     }
-    execSync(`git config --global user.name "${COMMIT_NAME}"`)
-    execSync(`git config --global user.email "${COMMIT_EMAIL}"`)
+
+    const { data: user } = await octokit.request('GET /user')
+    execSync(`git config --global user.name "${user.name}"`)
+    execSync(`git config --global user.email "${user.email}"`)
     execSync(`git commit --allow-empty -m "${commitMessage}"`)
     execSync('git push')
   } else {
