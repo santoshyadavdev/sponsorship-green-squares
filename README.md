@@ -39,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-### README Integration
+### Readme Integration
 
 When `allow-add-to-readme` is set to 'true', the action will update your
 README.md with sponsorship data. Add these markers where you want the data to
