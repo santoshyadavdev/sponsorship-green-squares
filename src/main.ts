@@ -119,7 +119,7 @@ async function updateReadme(profiles: SponsoredProfile[]): Promise<void> {
   }
 
   const sponsorshipData = profiles
-    .map(p => `- @${p.sponsorLogin}: ${p.sponsorshipAmount} ${p.currency}`)
+    .map((p) => `- @${p.sponsorLogin}: ${p.sponsorshipAmount} ${p.currency}`)
     .join('\n')
 
   const newContent = `${startMarker}\n${sponsorshipData}\n${endMarker}`
@@ -143,10 +143,10 @@ async function updateReadme(profiles: SponsoredProfile[]): Promise<void> {
     readmeContent = newContent
   }
 
-  await commitIfNotDuplicate(
-    `Update README with sponsorship data`,
-    { path: readmePath, content: readmeContent }
-  )
+  await commitIfNotDuplicate(`Update README with sponsorship data`, {
+    path: readmePath,
+    content: readmeContent
+  })
 }
 
 /**

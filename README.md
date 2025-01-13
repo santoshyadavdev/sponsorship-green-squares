@@ -37,19 +37,21 @@ jobs:
           allow-add-to-readme: 'false' # Default value, set to 'true' to enable README updates
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 ```
 
 ### README Integration
 
-When `allow-add-to-readme` is set to 'true', the action will update your README.md with sponsorship data. Add these markers where you want the data to appear:
+When `allow-add-to-readme` is set to 'true', the action will update your
+README.md with sponsorship data. Add these markers where you want the data to
+appear:
 
 ```markdown
 <!-- SPONSORSHIP-DATA:START -->
 <!-- SPONSORSHIP-DATA:END -->
 ```
 
-The action will automatically insert sponsorship data between these markers in the format:
+The action will automatically insert sponsorship data between these markers in
+the format:
 
 - @username: 5 USD
 - @sponsor2: 10 USD

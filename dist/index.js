@@ -1,6 +1,7 @@
 import require$$0 from 'os';
 import require$$0$1 from 'crypto';
-import require$$1 from 'fs';
+import * as require$$1 from 'fs';
+import require$$1__default from 'fs';
 import require$$1$5 from 'path';
 import require$$2 from 'http';
 import require$$3 from 'https';
@@ -222,7 +223,7 @@ function requireFileCommand () {
 	// We use any as a valid input type
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	const crypto = __importStar(require$$0$1);
-	const fs = __importStar(require$$1);
+	const fs = __importStar(require$$1__default);
 	const os = __importStar(require$$0);
 	const utils_1 = requireUtils$1();
 	function issueFileCommand(command, message) {
@@ -25192,7 +25193,7 @@ function requireSummary () {
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = undefined;
 		const os_1 = require$$0;
-		const fs_1 = require$$1;
+		const fs_1 = require$$1__default;
 		const { access, appendFile, writeFile } = fs_1.promises;
 		exports.SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
 		exports.SUMMARY_DOCS_URL = 'https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary';
@@ -25584,7 +25585,7 @@ function requireIoUtil () {
 		var _a;
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = undefined;
-		const fs = __importStar(require$$1);
+		const fs = __importStar(require$$1__default);
 		const path = __importStar(require$$1$5);
 		_a = fs.promises
 		// export const {open} = 'fs'
@@ -30822,7 +30823,7 @@ async function fetchSponsoredProfiles() {
         return [];
     }
 }
-async function commitIfNotDuplicate(commitMessage) {
+async function commitIfNotDuplicate(commitMessage, fileUpdate) {
     const { data: commits } = await octokit.repos.listCommits({
         owner: GH_USERNAME,
         repo: GH_USERNAME,
@@ -30830,15 +30831,69 @@ async function commitIfNotDuplicate(commitMessage) {
     });
     const duplicateCommit = commits.find((commit) => commit.commit.message === commitMessage);
     if (!duplicateCommit) {
-        // Commit the changes
+        if (fileUpdate) {
+            require$$1.writeFileSync(fileUpdate.path, fileUpdate.content, 'utf8');
+            execSync(`git add ${fileUpdate.path}`);
+        }
         execSync(`git config --global user.name "${COMMIT_NAME}"`);
         execSync(`git config --global user.email "${COMMIT_EMAIL}"`);
         execSync(`git commit --allow-empty -m "${commitMessage}"`);
         execSync('git push');
     }
     else {
-        coreExports.setFailed(`Duplicate commit found: ${commitMessage}`);
+        coreExports.info(`Skipping duplicate commit: ${commitMessage}`);
     }
+}
+async function updateReadme(profiles) {
+    const allowReadmeUpdate = coreExports.getInput('allow-add-to-readme') === 'true';
+    if (!allowReadmeUpdate)
+        return;
+    if (!Array.isArray(profiles)) {
+        throw new Error('Invalid profiles data');
+    }
+    const readmePath = 'README.md';
+    const startMarker = '<!-- SPONSORSHIP-DATA:START -->';
+    const endMarker = '<!-- SPONSORSHIP-DATA:END -->';
+    let readmeContent = '';
+    try {
+        readmeContent = require$$1.readFileSync(readmePath, 'utf8');
+    }
+    catch (error) {
+        if (error.code === 'ENOENT') {
+            coreExports.warning('README.md not found, creating new file');
+        }
+        else {
+            throw new Error(`Failed to read README.md: ${error}`);
+        }
+    }
+    const sponsorshipData = profiles
+        .map((p) => `- @${p.sponsorLogin}: ${p.sponsorshipAmount} ${p.currency}`)
+        .join('\n');
+    const newContent = `${startMarker}\n${sponsorshipData}\n${endMarker}`;
+    if (readmeContent) {
+        const startIndex = readmeContent.indexOf(startMarker);
+        const endIndex = readmeContent.indexOf(endMarker) + endMarker.length;
+        if (startIndex === -1 || endIndex === -1) {
+            coreExports.info('Markers not found, appending content to README');
+            readmeContent = `${readmeContent}\n\n${newContent}`;
+        }
+        else if (endIndex <= startIndex) {
+            throw new Error('Invalid marker positions in README.md');
+        }
+        else {
+            readmeContent =
+                readmeContent.substring(0, startIndex) +
+                    newContent +
+                    readmeContent.substring(endIndex);
+        }
+    }
+    else {
+        readmeContent = newContent;
+    }
+    await commitIfNotDuplicate(`Update README with sponsorship data`, {
+        path: readmePath,
+        content: readmeContent
+    });
 }
 /**
  * The main function for the action.
@@ -30848,20 +30903,18 @@ async function commitIfNotDuplicate(commitMessage) {
 async function run() {
     try {
         const ms = coreExports.getInput('milliseconds');
-        // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
+        const profiles = await fetchSponsoredProfiles();
+        await updateReadme(profiles);
         coreExports.debug(`Waiting ${ms} milliseconds ...`);
-        // Log the current timestamp, wait, then log the new timestamp
-        fetchSponsoredProfiles().then((data) => {
-            coreExports.debug(`number of profiles fetched: ${data.length}`);
-            const currentDate = new Date();
-            const month = currentDate.toLocaleString('default', { month: 'long' });
-            const year = currentDate.getFullYear();
-            data.forEach(async (profile) => {
-                coreExports.debug(`Sponsor: ${profile.sponsorLogin}`);
-                const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`;
-                await commitIfNotDuplicate(commitMessage);
-            });
-        });
+        coreExports.debug(`number of profiles fetched: ${profiles.length}`);
+        const currentDate = new Date();
+        const month = currentDate.toLocaleString('default', { month: 'long' });
+        const year = currentDate.getFullYear();
+        for (const profile of profiles) {
+            coreExports.debug(`Sponsor: ${profile.sponsorLogin}`);
+            const commitMessage = `${profile.sponsorshipAmount} ${profile.currency} paid to @${profile.sponsorLogin} for ${month} ${year} to support open source.`;
+            await commitIfNotDuplicate(commitMessage);
+        }
     }
     catch (error) {
         // Fail the workflow run if an error occurs
