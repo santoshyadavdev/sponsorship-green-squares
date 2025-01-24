@@ -95,58 +95,63 @@ async function commitIfNotDuplicate(
   }
 }
 
-async function updateReadme(profiles: SponsoredProfile[]): Promise<void> {
-  const allowReadmeUpdate = core.getInput('allow-add-to-readme') === 'true'
-  if (!allowReadmeUpdate) return
+async function updateReadme(profiles) {
+  const allowReadmeUpdate = core.getInput('allow-add-to-readme') === 'true';
+  if (!allowReadmeUpdate) return;
 
   if (!Array.isArray(profiles)) {
-    throw new Error('Invalid profiles data')
+    throw new Error('Invalid profiles data');
   }
 
-  const readmePath = 'README.md'
-  const startMarker = '<!-- SPONSORSHIP-DATA:START -->'
-  const endMarker = '<!-- SPONSORSHIP-DATA:END -->'
+  const readmePath = 'README.md';
+  const startMarker = '<!-- SPONSORSHIP-DATA:START -->';
+  const endMarker = '<!-- SPONSORSHIP-DATA:END -->';
 
-  let readmeContent = ''
+  let readmeContent = '';
   try {
-    readmeContent = fs.readFileSync(readmePath, 'utf8')
+    readmeContent = fs.readFileSync(readmePath, 'utf8');
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      core.warning('README.md not found, creating new file')
+    if ((error).code === 'ENOENT') {
+      core.warning('README.md not found, creating new file');
     } else {
-      throw new Error(`Failed to read README.md: ${error}`)
+      throw new Error(`Failed to read README.md: ${error}`);
     }
   }
 
+  // Map sponsorship profiles to the desired format
   const sponsorshipData = profiles
-    .map((p) => `- @${p.sponsorLogin}: ${p.sponsorshipAmount} ${p.currency}`)
-    .join('\n')
+    .map((p) => {
+      const emojiCount = Math.min(Math.floor(p.sponsorshipAmount / 5), 10); // 1 emoji per $5, capped at 10 emojis
+      const emojis = '💵'.repeat(emojiCount);
+      return `- @${p.sponsorLogin}: ${emojis} $${p.sponsorshipAmount}`;
+    })
+    .join('\n');
 
-  const newContent = `${startMarker}\n${sponsorshipData}\n${endMarker}`
+  const newContent = `${startMarker}\n${sponsorshipData}\n${endMarker}`;
 
   if (readmeContent) {
-    const startIndex = readmeContent.indexOf(startMarker)
-    const endIndex = readmeContent.indexOf(endMarker) + endMarker.length
+    const startIndex = readmeContent.indexOf(startMarker);
+    const endIndex = readmeContent.indexOf(endMarker) + endMarker.length;
 
     if (startIndex === -1 || endIndex === -1) {
-      core.info('Markers not found, appending content to README')
-      readmeContent = `${readmeContent}\n\n${newContent}`
+      core.info('Markers not found, appending content to README');
+      readmeContent = `${readmeContent}\n\n${newContent}`;
     } else if (endIndex <= startIndex) {
-      throw new Error('Invalid marker positions in README.md')
+      throw new Error('Invalid marker positions in README.md');
     } else {
       readmeContent =
         readmeContent.substring(0, startIndex) +
         newContent +
-        readmeContent.substring(endIndex)
+        readmeContent.substring(endIndex);
     }
   } else {
-    readmeContent = newContent
+    readmeContent = newContent;
   }
 
   await commitIfNotDuplicate(`Update README with sponsorship data`, {
     path: readmePath,
-    content: readmeContent
-  })
+    content: readmeContent,
+  });
 }
 
 /**
