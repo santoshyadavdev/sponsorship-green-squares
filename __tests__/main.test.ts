@@ -34,6 +34,9 @@ jest.unstable_mockModule('@actions/core', () => ({
   error: mockError
 }))
 
+// Note: Using jest.unstable_mockModule for Jest 30 ESM support
+// This is the recommended approach for mocking ES modules in Jest 30
+// See: https://jestjs.io/docs/ecmascript-modules
 jest.unstable_mockModule('@octokit/rest', () => ({
   Octokit: mockOctokit
 }))
