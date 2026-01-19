@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { jest, describe, it, expect, beforeEach } from '@jest/globals'
 
 const mockGetInput = jest.fn()
@@ -8,8 +9,8 @@ const mockInfo = jest.fn()
 const mockWarning = jest.fn()
 const mockError = jest.fn()
 
-const mockListCommits = jest.fn<() => Promise<{data: any[]}>>()
-const mockRequest = jest.fn<() => Promise<{data: any}>>()
+const mockListCommits = jest.fn<() => Promise<{ data: any[] }>>()
+const mockRequest = jest.fn<() => Promise<{ data: any }>>()
 const mockOctokit = jest.fn().mockImplementation(() => ({
   repos: {
     listCommits: mockListCommits
@@ -62,12 +63,17 @@ describe('run', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockExistsSync.mockReturnValue(false) // README doesn't exist by default
-    mockRequest.mockResolvedValue({ data: { name: 'github-actions[bot]', email: 'github-actions[bot]@users.noreply.github.com' } })
+    mockRequest.mockResolvedValue({
+      data: {
+        name: 'github-actions[bot]',
+        email: 'github-actions[bot]@users.noreply.github.com'
+      }
+    })
   })
 
   it('Commits changes if not duplicate', async () => {
     mockGetInput.mockReturnValueOnce('1000')
-    
+
     // Mock graphql response with sponsored profiles
     mockGraphql.mockResolvedValue({
       viewer: {
@@ -82,10 +88,10 @@ describe('run', () => {
         }
       }
     } as any)
-    
+
     // Mock Octokit to return no duplicate commits
     mockListCommits.mockResolvedValue({ data: [] })
-    
+
     mockWriteFileSync.mockImplementation(() => {})
     mockExecSync.mockReturnValue('')
 
@@ -105,7 +111,7 @@ describe('run', () => {
 
   it('Skips duplicate commit', async () => {
     mockGetInput.mockReturnValueOnce('1000')
-    
+
     // Mock graphql response with sponsored profiles
     mockGraphql.mockResolvedValue({
       viewer: {
@@ -120,10 +126,17 @@ describe('run', () => {
         }
       }
     } as any)
-    
+
     // Mock Octokit to return a duplicate commit
     mockListCommits.mockResolvedValue({
-      data: [{ commit: { message: '5 USD paid to @test-sponsor for January 2026 to support open source.' } }]
+      data: [
+        {
+          commit: {
+            message:
+              '5 USD paid to @test-sponsor for January 2026 to support open source.'
+          }
+        }
+      ]
     })
 
     await run()
